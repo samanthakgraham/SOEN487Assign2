@@ -12,16 +12,20 @@
             $.ajax({
                 url: 'http://localhost:8080/TemperatureService/resources/temperature/',
                 type: 'PUT',
-                data: '100',
+                data: '35',
                 contentType: 'text/plain',
-                success: function (data) {
-                    $('.result').html(data);
+                success: function (data) {                    
+                    $('.result').html("Temperature set to 35");
                 }
             });
-            $.ajax('http://localhost:8080/TemperatureService/resources/temperature/').done(function (data) {
-                $('.result').html(data);
-            });
-            ;
+            
+            $.ajax({
+                url: 'http://localhost:8080/TemperatureService/resources/temperature/',
+                type: 'GET',
+                success: function (data) {                    
+                    $('.result').append(data);
+                }
+            });              
         </script>
     </body>
 </html>
