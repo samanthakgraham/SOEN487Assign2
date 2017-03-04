@@ -6,6 +6,7 @@
 package service;
 
 import entities.Customer;
+import entities.DiscountCode;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -80,7 +81,15 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
     @Path("findByState/{state}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Customer> findByState(@PathParam("state") String state) {
-        return em.createNamedQuery("Customer.findByState").getResultList();
+        return em.createNamedQuery("Customer.findByState").setParameter("state", state).getResultList();
+    }
+    
+    @GET
+    @Path("findByDiscountCode/{code}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Customer> findByDiscountCode(@PathParam("code") String code) {
+        DiscountCode oCode = (DiscountCode)em.createNamedQuery("DiscountCode.findByDiscountCode").setParameter("discountCode", code).getSingleResult();
+        return em.createNamedQuery("Customer.findByDiscountCode").setParameter("discountCode", oCode).getResultList();
     }
 
     @GET
