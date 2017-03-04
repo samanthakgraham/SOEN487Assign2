@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
- * @author Kayleigh
+ * @author Samantha Graham
  */
 @Entity
 @Table(name = "MICRO_MARKET")

@@ -1,9 +1,3 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 var app = {
     // Create this closure to contain the cached modules
     module: function () {
@@ -24,9 +18,50 @@ var app = {
     }()
 };
 
-(function (models) {
+(function (models) { 
     
-// Model for Customer entity
+    // Model for DiscountCode entity
+    models.DiscountCode = Backbone.Model.extend({
+        urlRoot: "http://localhost:8080/CustomerDB/webresources/entities.discountcode/",
+        idAttribute: 'discountCode',
+        defaults: {
+            rate: "",
+            customerCollection: []
+        },
+        toViewJson: function () {
+            var result = this.toJSON();           
+            return result;
+        },
+        isNew: function () {
+            // default isNew() method imlementation is
+            // based on the 'id' initialization which
+            // sometimes is required to be initialized.
+            // So isNew() is rediefined here
+            return this.notSynced;
+        },
+        sync: function (method, model, options) {
+            options || (options = {});
+            var errorHandler = {
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // TODO: put your error handling code here
+                    // If you use the JS client from the different domain
+                    // (f.e. locally) then Cross-origin resource sharing 
+                    // headers has to be set on the REST server side.
+                    // Otherwise the JS client has to be copied into the
+                    // some (f.e. the same) Web project on the same domain
+                    alert('Unable to fulfil the request');
+                }
+            };
+            
+            if (method === 'create') {
+                options.url = 'http://localhost:8080/CustomerDB/webresources/entities.discountcode/';
+            }
+            var result = Backbone.sync(method, model, _.extend(options, errorHandler));
+            return result;
+        }                
+    });
+    
+    // Model for Customer entity
     models.Customer = Backbone.Model.extend({
         urlRoot: "http://localhost:8080/CustomerDB/webresources/entities.customer/",
         idAttribute: 'customerId',
@@ -42,8 +77,10 @@ var app = {
             email: ""
         },
         toViewJson: function () {
-            var result = this.toJSON(); // displayName property is used to render item in the list
-            result.displayName = this.get('name');
+            var result = this.toJSON();            
+            result.discountCode = this.get('discountCode').discountCode;
+            
+            result.zip = this.get('zip').zipCode;            
             return result;
         },
         isNew: function () {
@@ -72,11 +109,31 @@ var app = {
             }
             var result = Backbone.sync(method, model, _.extend(options, errorHandler));
             return result;
-        }
-        
-        
-    });
+        }                
+    });  
     
+    // Collection class for DiscountCode entities
+    models.DiscountCodeCollection = Backbone.Collection.extend({        
+        model: models.DiscountCode,
+        url: "http://localhost:8080/CustomerDB/webresources/entities.discountcode/",
+        sync: function (method, model, options) {
+            options || (options = {});
+            var errorHandler = {
+                error: function (jqXHR, textStatus, errorThrown) {
+                    // TODO: put your error handling code here
+                    // If you use the JS client from the different domain
+                    // (f.e. locally) then Cross-origin resource sharing 
+                    // headers has to be set on the REST server side.
+                    // Otherwise the JS client has to be copied into the
+                    // some (f.e. the same) Web project on the same domain
+                    alert('Unable to fulfil the request');
+                }
+            };
+            
+            var result = Backbone.sync(method, model, _.extend(options, errorHandler));
+            return result;
+        }
+    }); 
     
     // Collection class for Customer entities
     models.CustomerCollection = Backbone.Collection.extend({
@@ -99,15 +156,13 @@ var app = {
             var result = Backbone.sync(method, model, _.extend(options, errorHandler));
             return result;
         }
-    });
-    
-    
+    });        
 })(app.module("models"));
 
 (function (views) {
     
-    views.ListView = Backbone.View.extend({
-        tagName: 'ul',
+    views.CustomerListView = Backbone.View.extend({
+        tagName: 'table',
         initialize: function (options) {
             this.options = options || {};
             this.model.bind("reset", this.render, this);
@@ -121,8 +176,36 @@ var app = {
             });
         },
         render: function (eventName) {
+            var self = this; 
+            $(this.el).append('<tr><th>custId</th><th>dis-code</th><th>name</th><th>addr</th><th>city</th><th>state</th><th>zip</th><th>phone</th><th>fax</th><th>email</th></tr>');
+            _.each(this.model.models, function (modelName) {                 
+                $(this.el).append(new views.ListItemView({
+                    model: modelName,
+                    templateName: self.options.templateName
+                }).render().el);
+            }, this);
+            return this;
+        }
+    });
+    
+    views.CodesListView = Backbone.View.extend({
+        tagName: 'table',
+        initialize: function (options) {
+            this.options = options || {};
+            this.model.bind("reset", this.render, this);
             var self = this;
-            _.each(this.model.models, function (modelName) {
+            this.model.bind("add", function (modelName) {
+                var row = new views.ListItemView({
+                    model: modelName,
+                    templateName: self.options.templateName
+                }).render().el;
+                $(self.el).append($(row));
+            });
+        },
+        render: function (eventName) {
+            var self = this; 
+            $(this.el).append('<tr><th>dis-code</th><th>rate</th><th>Customer IDs</th></tr>');
+            _.each(this.model.models, function (modelName) {                 
                 $(this.el).append(new views.ListItemView({
                     model: modelName,
                     templateName: self.options.templateName
@@ -133,7 +216,7 @@ var app = {
     });
     
     views.ListItemView = Backbone.View.extend({
-        tagName: "li",
+        tagName: "tr",
         initialize: function (options) {
             this.options = options || {};
             this.model.bind("change", this.render, this);
@@ -271,25 +354,33 @@ $(function () {
         },
         initialize: function () {
             var self = this;
-            $('#header').html(new views.CreateView({
-                // tpl-create is template identifier for 'create' block
-                templateName: '#tpl-create',
-                navigate: function () {
-                    self.navigate('new', true);
-                }
-            }).render().el);
         },
         list: function () {
-            this.collection = new models.CustomerCollection();
+            this.customer_collection = new models.CustomerCollection();
+            this.discountcode_collection = new models.DiscountCodeCollection();
             var self = this;
-            this.collection.fetch({
+            
+            this.customer_collection.fetch({
                 success: function () {
-                    self.listView = new views.ListView({
-                        model: self.collection,
-                        // tpl-customer-list-itemis template identifier for item
+                    self.listView = new views.CustomerListView({
+                        model: self.customer_collection,                        
                         templateName: '#tpl-customer-list-item'
                     });
-                    $('#sidebar').html(self.listView.render().el);
+                    
+                    $('#customers').html(self.listView.render().el);
+                    if (self.requestedId) {
+                        self.details(self.requestedId);
+                    }
+                }
+            });
+            
+            this.discountcode_collection.fetch({
+                success: function () {
+                    self.listView = new views.CodesListView({
+                        model: self.discountcode_collection,                        
+                        templateName: '#tpl-discountcode-list-item'
+                    });
+                    $('#discounts').html(self.listView.render().el);
                     if (self.requestedId) {
                         self.details(self.requestedId);
                     }

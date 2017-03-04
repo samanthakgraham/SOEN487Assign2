@@ -1,13 +1,9 @@
-<!--
-To change this license header, choose License Headers in Project Properties.
-To change this template file, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>Exercise 1 - SOEN487 Assignment 2</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="css/main.css" type="text/css">
         <script src='http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js'></script>
         <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
         <script src='http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js'></script>
@@ -16,53 +12,32 @@ and open the template in the editor.
     <body>
         <div id='header'></div>
 
-        <div id='sidebar'></div>
+        <h3>Customers</h3>
+        <div id='customers'></div>
+        
+        <h3>Discount Codes</h3>
+        <div id='discounts'></div>
 
         <div id='content'></div>
 
 
         <!-- Templates -->
-        <script type='text/template' id='tpl-create'>
-            <!--
-            Put your controls to create new entity here.
-
-            Class 'new' is used to listen on events in JS code.
-            -->
-            <button class='new'>Create</button>
-        </script>
-
         <script type='text/template' id='tpl-customer-list-item'>
-            <!-- modify output display name for item here or change displayName in the JS model code -->
-            <a href='#<%= customerId %>'><%= displayName %></a>
+            <td><%= customerId %></td>
+            <td><%= discountCode %></td>
+            <td><%= name %></td>
+            <td><%= addressline1 %> <%= addressline2 %></td>
+            <td><%= city %></td>
+            <td><%= state %></td>
+            <td><%= zip %></td>
+            <td><%= phone %></td>
+            <td><%= fax %></td>
+            <td><%= email %></td>            
         </script>
-
-        <script type='text/template' id='tpl-customer-details'>
-            <div>
-            <label>Id:</label>
-            <input type='text' id='customerId' name='id' value='<%= typeof(customerId)!== "undefined" ? customerId : "" %>'  />
-            <label>Name:</label>
-            <input type='text' id='name' name='name' value='<%= name %>'/>
-            <!--
-            Put your editing controls for model
-            attribute data (text fields, ...) here
-            <label>city:</label>
-            <input type='text' id='city' name='city' value='<%= city %>'/><label>phone:</label>
-            <input type='text' id='phone' name='phone' value='<%= phone %>'/><label>addressline2:</label>
-            <input type='text' id='addressline2' name='addressline2' value='<%= addressline2 %>'/><label>creditLimit:</label>
-            <input type='text' id='creditLimit' name='creditLimit' value='<%= creditLimit %>'/><label>addressline1:</label>
-            <input type='text' id='addressline1' name='addressline1' value='<%= addressline1 %>'/><label>state:</label>
-            <input type='text' id='state' name='state' value='<%= state %>'/><label>fax:</label>
-            <input type='text' id='fax' name='fax' value='<%= fax %>'/><label>email:</label>
-            <input type='text' id='email' name='email' value='<%= email %>'/>-->
-            <!--
-            Put your controls to create new entity here.
-            Classes 'save' and 'delete' are used to listen on events in JS code.
-            -->
-            <button  class='save'>Save</button>
-            <button  class='delete'>Delete</button>
-            </div>
+        
+        <script type='text/template' id='tpl-discountcode-list-item'>
+            <td><%= discountCode %></td>  
+            <td><%= rate %></td>                       
         </script>
-
-
     </body>
 </html>

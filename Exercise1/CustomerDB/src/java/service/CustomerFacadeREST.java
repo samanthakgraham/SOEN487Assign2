@@ -22,7 +22,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  *
- * @author Kayleigh
+ * @author Samantha Graham
  */
 @Stateless
 @Path("entities.customer")
@@ -74,6 +74,13 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<Customer> findRange(@PathParam("from") Integer from, @PathParam("to") Integer to) {
         return super.findRange(new int[]{from, to});
+    }
+    
+    @GET
+    @Path("findByState/{state}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<Customer> findByState(@PathParam("state") String state) {
+        return em.createNamedQuery("Customer.findByState").getResultList();
     }
 
     @GET
