@@ -65,13 +65,6 @@ public class DiscountCodeFacadeREST extends AbstractFacade<DiscountCode> {
     }
     
     @GET
-    @Path("findByCode/{code}")
-    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public DiscountCode findByCode(@PathParam("code") String code) {
-        return (DiscountCode)em.createNamedQuery("DiscountCode.findByDiscountCode").setParameter("discountCode", code).getSingleResult();
-    }
-    
-    @GET
     @Path("findCustomersByCode/{code}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Collection<Customer> findCustomersByCode(@PathParam("code") String code) {

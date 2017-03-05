@@ -25,10 +25,24 @@ var app = {
         urlRoot: "http://localhost:8080/CustomerDB/webresources/entities.discountcode/",
         idAttribute: 'discountCode',
         defaults: {
-            rate: ""
+            rate: "",
+            customerCollection: ""
         },
         toViewJson: function () {
-            var result = this.toJSON();              
+            var result = this.toJSON(); 
+
+            $.ajax({
+                url: 'http://localhost:8080/CustomerDB/webresources/entities.discountcode/findCustomersByCode/' + result.discountCode,
+                type: 'GET',
+                dataType: 'json',
+                async: false,
+                success: function (data) {   
+                    $.each(data, function(key, value) { 
+                        result.customerCollection += value.customerId + ", ";
+                        return result;
+                    });
+                }
+            }); 
             return result;
         },
         isNew: function () {
@@ -130,7 +144,7 @@ var app = {
                 }
             };
             
-            var result = Backbone.sync(method, model, _.extend(options, errorHandler));
+            var result = Backbone.sync(method, model, _.extend(options, errorHandler));                 
             return result;
         }
     }); 
@@ -153,7 +167,7 @@ var app = {
                 }
             };
             
-            var result = Backbone.sync(method, model, _.extend(options, errorHandler));
+            var result = Backbone.sync(method, model, _.extend(options, errorHandler));            
             return result;
         }
     });        
@@ -388,7 +402,7 @@ $(function () {
         },
         initialize: function () {
             var self = this;
-            $('#content').html(new views.FilterView({
+            $('#filtered').html(new views.FilterView({
                 // tpl-create is template identifier for 'create' block
                 templateName: '#tpl-filter',
                 navigate: function () {
