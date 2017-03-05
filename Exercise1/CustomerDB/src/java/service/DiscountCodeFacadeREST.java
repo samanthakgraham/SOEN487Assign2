@@ -5,7 +5,9 @@
  */
 package service;
 
+import entities.Customer;
 import entities.DiscountCode;
+import java.util.Collection;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -67,6 +69,14 @@ public class DiscountCodeFacadeREST extends AbstractFacade<DiscountCode> {
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public DiscountCode findByCode(@PathParam("code") String code) {
         return (DiscountCode)em.createNamedQuery("DiscountCode.findByDiscountCode").setParameter("discountCode", code).getSingleResult();
+    }
+    
+    @GET
+    @Path("findCustomersByCode/{code}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Collection<Customer> findCustomersByCode(@PathParam("code") String code) {
+        DiscountCode discountCode = (DiscountCode)em.createNamedQuery("DiscountCode.findByDiscountCode").setParameter("discountCode", code).getSingleResult();
+        return discountCode.getCustomerCollection();
     }
 
     @GET

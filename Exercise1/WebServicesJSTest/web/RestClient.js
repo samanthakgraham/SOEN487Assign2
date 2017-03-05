@@ -25,11 +25,10 @@ var app = {
         urlRoot: "http://localhost:8080/CustomerDB/webresources/entities.discountcode/",
         idAttribute: 'discountCode',
         defaults: {
-            rate: "",
-            customerCollection: []
+            rate: ""
         },
         toViewJson: function () {
-            var result = this.toJSON();           
+            var result = this.toJSON();              
             return result;
         },
         isNew: function () {
@@ -77,10 +76,11 @@ var app = {
             email: ""
         },
         toViewJson: function () {
-            var result = this.toJSON();            
-            result.discountCode = this.get('discountCode').discountCode;
+            var result = this.toJSON(); 
             
-            result.zip = this.get('zip').zipCode;            
+            result.discountCode = this.get('discountCode').discountCode;            
+            result.zip = this.get('zip').zipCode;   
+            
             return result;
         },
         isNew: function () {
@@ -234,6 +234,9 @@ var app = {
             $(this.el).html(this.template(this.model.toViewJson()));
             return this;
         },
+        events: {
+            "click .new": "filter"        
+        },
         close: function () {
             $(this.el).unbind();
             $(this.el).remove();
@@ -338,6 +341,37 @@ var app = {
         }
     });
     
+    // This view is used to filter customers
+    views.FilterView = Backbone.View.extend({
+        initialize: function (options) {
+            this.options = options || {};
+            this.render();
+        },
+        render: function (eventName) {
+            $(this.el).html(this.template());
+            return this;
+        },
+        template: function (json) {
+            /*
+             *  templateName is element identifier in HTML
+             *  $(this.options.templateName) is element access to the element
+             *  using jQuery 
+             */
+            return _.template($(this.options.templateName).html())(json);
+        },
+        /*
+         *  Class "new" is used on the control to listen events.
+         *  So it is supposed that HTML has a control with "new" class.
+         */
+        events: {
+            "click .filter": "filter"
+        },
+        filter: function (event) {
+            this.options.navigate();
+            return false;
+        }
+    });
+    
 })(app.module("views"));
 
 
@@ -348,12 +382,50 @@ $(function () {
     var AppRouter = Backbone.Router.extend({
         routes: {
             '': 'list',
-            'new': 'create'
-            ,
-            ':id': 'details'
+            'new': 'create',
+            'filter': 'filter',
+            ':id': 'details'            
         },
         initialize: function () {
             var self = this;
+            $('#content').html(new views.FilterView({
+                // tpl-create is template identifier for 'create' block
+                templateName: '#tpl-filter',
+                navigate: function () {
+                    self.navigate('filter', true);
+                }
+            }).render().el);
+        },
+        filter: function() {            
+            this.customer_collection = new models.CustomerCollection();
+            
+            var url = 'http://localhost:8080/CustomerDB/webresources/entities.customer/';
+            if($('#id').val() !== '') {
+                url = 'http://localhost:8080/CustomerDB/webresources/entities.customer/' + $('#id').val();
+            }            
+            if($('#state').val() !== '') {
+                url = 'http://localhost:8080/CustomerDB/webresources/entities.customer/findByState/' + $('#state').val();
+            }            
+            if($('#code').val() !== '') {
+                url = 'http://localhost:8080/CustomerDB/webresources/entities.customer/findByDiscountCode/' + $('#code').val();
+            }
+            
+            this.customer_collection.url = url;
+            var self = this;
+            
+            this.customer_collection.fetch({
+                success: function () {
+                    self.listView = new views.CustomerListView({
+                        model: self.customer_collection,                        
+                        templateName: '#tpl-customer-list-item'
+                    });
+                    
+                    $('#filter-results').html(self.listView.render().el);
+                    if (self.requestedId) {
+                        self.details(self.requestedId);
+                    }
+                }
+            });
         },
         list: function () {
             this.customer_collection = new models.CustomerCollection();
@@ -386,8 +458,9 @@ $(function () {
                     }
                 }
             });
+
         },
-        details: function (id) {
+        details: function (id) {            
             if (this.collection) {
                 this.customer = this.collection.get(id);
                 if (this.view) {
@@ -408,7 +481,7 @@ $(function () {
                 this.list();
             }
         },
-        create: function () {
+        create: function () {            
             if (this.view) {
                 this.view.close();
             }

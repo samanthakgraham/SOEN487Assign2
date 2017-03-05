@@ -18,10 +18,28 @@
         <h3>Discount Codes</h3>
         <div id='discounts'></div>
 
-        <div id='content'></div>
+        <h3>Bonus: Filtering Results</h3>
+        <div id='content'>
+<!--            <form id="filter">
+                <input type="number" name="id" id="id" placeholder="Customer ID"/> OR
+                <input type="text" name="state" id="state" placeholder="State"/> OR
+                <input type="text" name="code" id="code" placeholder="Discount code"/>
+                <input type="submit" value="Filter" id="submit" />                
+            </form>
+            <div id="filter-results"></div>-->
+        </div>
 
 
         <!-- Templates -->
+        <script type="text/template" id="tpl-filter">
+            <form id="filter">
+                <input type="number" name="id" id="id" placeholder="Customer ID"/> OR
+                <input type="text" name="state" id="state" placeholder="State"/> OR
+                <input type="text" name="code" id="code" placeholder="Discount code"/>
+                <button class='filter'>Filter</button>            
+            </form>
+            <div id="filter-results"></div>
+        </script>
         <script type='text/template' id='tpl-customer-list-item'>
             <td><%= customerId %></td>
             <td><%= discountCode %></td>
